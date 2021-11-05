@@ -77,19 +77,20 @@ def convert(xml_files, json_file):
         tree = ET.parse(xml_file)
         root = tree.getroot()
         path = get(root, "path")
-        if len(path) == 1:
-            filename = os.path.basename(path[0].text)
-        elif len(path) == 0:
-            filename = get_and_check(root, "filename", 1).text
-        else:
-            raise ValueError("%d paths found in %s" % (len(path), xml_file))
+        # if len(path) == 1:
+        #     filename = os.path.basename(path[0].text)
+        # elif len(path) == 0:
+        #     filename = get_and_check(root, "filename", 1).text
+        # else:
+        #     raise ValueError("%d paths found in %s" % (len(path), xml_file))
+        filename = get_and_check(root, "filename", 1).text
         ## The filename must be a number
         image_id = get_filename_as_int(filename)
         size = get_and_check(root, "size", 1)
         width = int(get_and_check(size, "width", 1).text)
         height = int(get_and_check(size, "height", 1).text)
         image = {
-            "file_name": filename,
+            "file_name": filename + '.jpg',
             "height": height,
             "width": width,
             "id": image_id,
@@ -129,6 +130,8 @@ def convert(xml_files, json_file):
     for cate, cid in categories.items():
         cat = {"supercategory": "none", "id": cid, "name": cate}
         json_dict["categories"].append(cat)
+        
+    json_dict['images'].sort(key=lambda x: x['id'])
 
     os.makedirs(os.path.dirname(json_file), exist_ok=True)
     json_fp = open(json_file, "w")
